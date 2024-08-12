@@ -68,7 +68,7 @@ def load_templates(env: Environment) -> Dict[str, Any]:
     }
 
 def write_to_file(filename, content):
-    with open(filename, 'w') as file:
+    with open(filename, 'a') as file:
         file.write(content + '\n')
 
 def process_pdf_page(page: Any, file: str, idx: int, templates: Dict[str, Any], bedrock_client: Any) -> str:
@@ -101,8 +101,9 @@ def process_pdf_page(page: Any, file: str, idx: int, templates: Dict[str, Any], 
         input_text_post,
         input_image
     )
+    print(response)
     
-    filename = OUTPUT_DIR + "/idp_output.txt"
+    filename = OUTPUT_DIR + f"/idp_output_{file}.txt"
     content = response['output']['message']['content'][0]['text']
     write_to_file(filename, content)
     
@@ -132,18 +133,15 @@ def process_pdf_file(file_path: str, templates: Dict[str, Any], bedrock_client: 
         List[str]: List of generated content for each page in the PDF.
     """
     objects = []
-    results = []
     try:
         with pdfplumber.open(file_path) as pdf_obj:
             for idx, page in enumerate(pdf_obj.pages):
                 file = os.path.basename(file_path)
                 obj = {"page": page, "file": file, "idx": idx, "templates": templates, "bedrock_client": bedrock_client}
                 objects.append(obj)   
-        loop = asyncio.get_event_loop()
-        loop.create_task(parallel_calls(objects))
     except Exception as e:
         print(f"Error processing file {file_path}: {str(e)}")
-    return results
+    return objects
 
 
 
@@ -164,7 +162,7 @@ def save_results(file_name: str, results: List[str]) -> None:
         print(f"Error saving results to {output_path}: {str(e)}")
 
 
-def main() -> None:
+async def main() -> None:
     """
     Main function to orchestrate the PDF processing workflow.
 
@@ -182,8 +180,9 @@ def main() -> None:
                 if file.lower().endswith('.pdf'):
                     print(f"Processing: {file}")
                     file_path = os.path.join(root, file)
-                    results = process_pdf_file(file_path, templates, bedrock_client)
-                    save_results(f"{file}_output.txt", results)
+                    objects = process_pdf_file(file_path, templates, bedrock_client)
+                    loop = asyncio.get_event_loop()
+                    await loop.create_task(parallel_calls(objects))
                 else:
                     print(f"Skipping non-PDF file: {file}")
 
@@ -191,4 +190,4 @@ def main() -> None:
         print(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
