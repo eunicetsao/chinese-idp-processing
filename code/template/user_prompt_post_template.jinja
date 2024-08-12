@@ -1,0 +1,35 @@
+Follow these steps to complete the task:
+
+1. Analyze the image content and identify the types of content present (graphs, tables, text).
+
+2. For each type of content in the image:
+   a. If it's a graph/diagram/figure:
+      - Provide a short description of the graph/diagram/figure
+      - Do not provide a fake link
+   b. If it's a table:
+      - Extract all cells correctly
+      - Compare the extracted cell values with the corresponding section in the PDF text
+      - Use the PDF text as the correct version if there are discrepancies
+      - Format the table in markdown
+      - Ensure each cell value is aligned with its column
+   c. If it's text and not cell values of (b):
+      - Extract the text
+      - Compare the extracted text with the corresponding section in the PDF text
+      - Use the PDF text as the correct version if there are discrepancies
+      - Ensure there are no duplicates in both (b) and (c)
+
+3. Maintain the original order of content as it appears in the image.
+
+4. Use the **ORIGINAL MAIN LANGUAGE** in the PDF page, **DONOT** do translation.
+
+5. Format the final content in clean, structured markdown.
+
+6. Ensure that all content is included and accurately represented.
+
+7. **DONOT** add any prefix before <result>.
+
+Present your final result within <result> tags. The content inside these tags should be the clean, structured markdown representation of the PDF page content, suitable for use as RAG input.
+
+Return <filename> and <page_number> info in a JSON format.
+
+Remember to include all relevant information from both the PDF text and the image content, prioritizing accuracy and maintaining the original order and language of the content.
